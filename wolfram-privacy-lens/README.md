@@ -2,7 +2,7 @@
 
 Privacy Lens is a Wolfram Language prototype for reviewing browser cookie metadata.
 
-It checks five things: Secure, HTTPOnly, SameSite, third party use, and cookie lifetime. Each cookie receives a transparent score and a list of findings. It also gives examples of software alternatives by category.
+It checks five things: Secure, HttpOnly, SameSite, third party use, and cookie lifetime. Each cookie receives a transparent score and a list of findings. It also gives examples of software alternatives by category.
 
 The records in the notebook are fictional. The project does not read a live browser profile, send cookie data anywhere, or query a breach database. The score is a simple screening rule, not proof that a cookie is safe or unsafe.
 
