@@ -1,17 +1,17 @@
 ClearAll[cookieFindings, cookieRiskScore, riskLevel, auditCookies, alternativeSuggestions];
 
 sampleCookies = {
-  <|"Name" -> "session_id", "Domain" -> "shop.example", "Secure" -> True, "HTTPOnly" -> True, "SameSite" -> "Lax", "ThirdParty" -> False, "LifetimeDays" -> 0|>,
-  <|"Name" -> "preferences", "Domain" -> "shop.example", "Secure" -> True, "HTTPOnly" -> False, "SameSite" -> "Lax", "ThirdParty" -> False, "LifetimeDays" -> 400|>,
-  <|"Name" -> "analytics_id", "Domain" -> "stats.example", "Secure" -> False, "HTTPOnly" -> False, "SameSite" -> "None", "ThirdParty" -> True, "LifetimeDays" -> 730|>,
-  <|"Name" -> "ad_tracker", "Domain" -> "ads.example", "Secure" -> False, "HTTPOnly" -> False, "SameSite" -> "None", "ThirdParty" -> True, "LifetimeDays" -> 3650|>,
-  <|"Name" -> "login_state", "Domain" -> "accounts.example", "Secure" -> True, "HTTPOnly" -> True, "SameSite" -> "Strict", "ThirdParty" -> False, "LifetimeDays" -> 30|>
+  <|"Name" -> "session_id", "Domain" -> "shop.example", "Secure" -> True, "HttpOnly" -> True, "SameSite" -> "Lax", "ThirdParty" -> False, "LifetimeDays" -> 0|>,
+  <|"Name" -> "preferences", "Domain" -> "shop.example", "Secure" -> True, "HttpOnly" -> False, "SameSite" -> "Lax", "ThirdParty" -> False, "LifetimeDays" -> 400|>,
+  <|"Name" -> "analytics_id", "Domain" -> "stats.example", "Secure" -> False, "HttpOnly" -> False, "SameSite" -> "None", "ThirdParty" -> True, "LifetimeDays" -> 730|>,
+  <|"Name" -> "ad_tracker", "Domain" -> "ads.example", "Secure" -> False, "HttpOnly" -> False, "SameSite" -> "None", "ThirdParty" -> True, "LifetimeDays" -> 3650|>,
+  <|"Name" -> "login_state", "Domain" -> "accounts.example", "Secure" -> True, "HttpOnly" -> True, "SameSite" -> "Strict", "ThirdParty" -> False, "LifetimeDays" -> 30|>
 };
 
 cookieFindings[cookie_Association] := DeleteCases[
   {
     If[!TrueQ[Lookup[cookie, "Secure", False]], "The cookie is not marked Secure.", Nothing],
-    If[!TrueQ[Lookup[cookie, "HTTPOnly", False]], "JavaScript may be able to read this cookie. Use HTTPOnly when the site does not need script access.", Nothing],
+    If[!TrueQ[Lookup[cookie, "HttpOnly", False]], "JavaScript may be able to read this cookie. Use HttpOnly when the site does not need script access.", Nothing],
     If[!MemberQ[{"Lax", "Strict"}, Lookup[cookie, "SameSite", "Missing"]], "Review the SameSite setting. Lax or Strict may be suitable, depending on the site.", Nothing],
     If[TrueQ[Lookup[cookie, "ThirdParty", False]], "This cookie is set by a third party. Check whether it is needed.", Nothing],
     If[TrueQ[Lookup[cookie, "LifetimeDays", 0] > 365], "The cookie lasts longer than one year. Consider a shorter lifetime.", Nothing]
@@ -22,7 +22,7 @@ cookieFindings[cookie_Association] := DeleteCases[
 cookieRiskScore[cookie_Association] := Min[
   100,
   25 Boole[!TrueQ[Lookup[cookie, "Secure", False]]] +
-  20 Boole[!TrueQ[Lookup[cookie, "HTTPOnly", False]]] +
+  20 Boole[!TrueQ[Lookup[cookie, "HttpOnly", False]]] +
   15 Boole[!MemberQ[{"Lax", "Strict"}, Lookup[cookie, "SameSite", "Missing"]]] +
   20 Boole[TrueQ[Lookup[cookie, "ThirdParty", False]]] +
   20 Boole[TrueQ[Lookup[cookie, "LifetimeDays", 0] > 365]]
@@ -82,3 +82,12 @@ Print[
 
 Print["Example password manager alternative"];
 Print[alternativeSuggestions["Password manager"]];
+Print["Checks"];
+Print[
+  TestReport[{
+    VerificationTest[Lookup[auditResults, "RiskLevel"], {"Low", "Review", "High", "High", "Low"}, TestID -> "risk levels"],
+    VerificationTest[Lookup[auditResults[[1]], "RiskScore"], 0, TestID -> "secure session cookie"],
+    VerificationTest[Lookup[auditResults[[2]], "RiskScore"], 40, TestID -> "long lived preference cookie"],
+    VerificationTest[Lookup[riskCounts, {"Low", "Review", "High"}, 0], {2, 1, 2}, TestID -> "risk summary"]
+  }]
+];
