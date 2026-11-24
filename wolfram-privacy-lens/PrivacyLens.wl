@@ -25,7 +25,7 @@ cookieRiskScore[cookie_Association] := Min[
   20 Boole[!TrueQ[Lookup[cookie, "HTTPOnly", False]]] +
   15 Boole[!MemberQ[{"Lax", "Strict"}, Lookup[cookie, "SameSite", "Missing"]]] +
   20 Boole[TrueQ[Lookup[cookie, "ThirdParty", False]]] +
-  20 Boole[TrueQ[Lookup[cookie, "LifetimeDays", 0] > 365]
+  20 Boole[TrueQ[Lookup[cookie, "LifetimeDays", 0] > 365]]
 ];
 
 riskLevel[score_Integer] := Which[
